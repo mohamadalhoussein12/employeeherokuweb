@@ -1,0 +1,11 @@
+.employees-list {
+    display: grid;
+    /* grid-auto-flow: row; */
+    grid-template-columns: repeat(4, 1fr);
+    column-gap: 0px;
+    grid-column: 0px;
+    justify-items: center;
+    margin-left: 100px;
+    margin-right: 100px;
+    /* justify-content: center; */
+  }

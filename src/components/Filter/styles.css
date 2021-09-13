@@ -1,0 +1,21 @@
+.filter-row {
+  margin-top: 50px;
+  margin-bottom: 50px;
+  display: flex;
+  margin-left:130px;
+  margin-right: 130px;
+  /* justify-content: center; */
+  /* flex-direction: row-reverse; */
+
+  /* margin-right: 50px; */
+}
+
+.select-div {
+  margin-left: auto;
+  margin-right: 10px;
+}
+
+.menu-item {
+  text-align: center;
+  margin-left: 10px;
+}
