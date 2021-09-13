@@ -46,13 +46,15 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: 'green',
     color: 'white',
     padding: '5px',
-    textAlign: 'center',
     float: 'left',
     marginBottom: '10px'
   },
   deleteIcon: {
     color: 'red',
     float: 'right'
+  },
+  email: {
+    padding: '10px'
   }
 }));
 const EmployeeCard = ({ employee, onDeleteClick, onEditClick }) => {
@@ -101,7 +103,7 @@ const EmployeeCard = ({ employee, onDeleteClick, onEditClick }) => {
             onClick={(e) => handleDeleteClick(e)}
           />
         </div>
-        <Typography>
+        <Typography variant='body' className={classes.email}>
          {employee.email}
         </Typography>
       </CardContent>
