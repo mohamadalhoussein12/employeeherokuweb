@@ -1,5 +1,10 @@
-import React, { useState, useEffect } from 'react';
+// libraries
+import PropTypes from 'prop-types';
+
+// files
 import EmployeeCard from './EmployeeCard';
+
+//css
 import "./styles.css";
 
 const EmployeeList = ({ employees, onDeleteEmployee, onEditEmployee }) => {
@@ -8,13 +13,24 @@ const EmployeeList = ({ employees, onDeleteEmployee, onEditEmployee }) => {
       {employees.map((employee) => (
         <EmployeeCard
         employee={employee}
-        handleDelete={(e) => onDeleteEmployee(e)}
-        handleEdit={(e) => onEditEmployee(e)}
+        onDeleteClick={(e) => onDeleteEmployee(e)}
+        onEditClick={(e) => onEditEmployee(e)}
         />
       ))}
     </div>
   )
 }
 
+// default props
+EmployeeList.defaultProps = {
+  employees: []
+}
+
+//prop types
+EmployeeList.propTypes = {
+  employees: PropTypes.array.isRequired,
+  onDeleteEmployee: PropTypes.func.isRequired,
+  onEditEmployee: PropTypes.func.isRequired
+}
 
 export default EmployeeList;

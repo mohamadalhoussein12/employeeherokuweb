@@ -1,11 +1,13 @@
-import thunk from "redux-thunk";
+// libraries
+import thunk from 'redux-thunk';
 import {
   createStore,
   applyMiddleware,
   compose
-} from "redux";
+} from 'redux';
 
-import rootReducer from "../reducers";
+//functions
+import rootReducer from '../reducers';
 
 const middleWare = [thunk];
 const initialState = {};

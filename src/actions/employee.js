@@ -1,11 +1,11 @@
+// constants
 import {
   GET_EMPLOYEES,
   EMPLOYEE_ERROR,
-  DELETE_EMPLOYEE,
   ADD_EMPLOYEE,
-  EDIT_EMPLOYEE
 } from '../actionTypes';
 
+// api
 import {
   getEmployees,
   deleteEmployeeById,
@@ -13,29 +13,17 @@ import {
   editEmployeeApi,
 } from '../api';
 
+/**
+ * getAllEmployees gets employees from api and dispatches them to state
+ */
 export const getAllEmployees = ({ search, departmentId, locationId, offset }) => async dispatch => {
-  console.log('in get all employees');
   try {
     const result = await getEmployees({ search, departmentId, locationId, offset });
-    console.log('result', result);
-    dispatch({ type: GET_EMPLOYEES, payload: result.data.data });
-  }
-  catch (err) {
-    dispatch({ type: EMPLOYEE_ERROR, payload: err.message});
-  }
-};
-
-export const deleteEmployee = ({ employeeId }) => async dispatch => {
-  try {
-    console.log('in get all employees');
-    const result = await deleteEmployeeById({ employeeId });
-    console.log('result', result);
-    if (result && result.data && result.data.success === 'false') {
-      console.log('in if');
+    if (result && result.data && !result.data.success) {
       dispatch({ type: EMPLOYEE_ERROR, payload: result.data.error.message });
     }
     else {
-      dispatch({ type: DELETE_EMPLOYEE, payload: result.data.data });
+      dispatch({ type: GET_EMPLOYEES, payload: result.data.data });
     }
   }
   catch (err) {
@@ -43,10 +31,41 @@ export const deleteEmployee = ({ employeeId }) => async dispatch => {
   }
 };
 
-export const addEmployee = (employee) => async dispatch => {
-  console.log('emp to create11', employee);
+/**
+ * deletes employe with _id employeeId using deleteEmployeeById api
+ */
+export const deleteEmployee = ({ employeeId, getEmployeesCondtion }) => async dispatch => {
   try {
-    console.log('in get all employees');
+    const result = await deleteEmployeeById({ employeeId });
+    if (result && result.data && !result.data.success) {
+      dispatch({ type: EMPLOYEE_ERROR, payload: result.data.error.message });
+    }
+    else {
+      const {
+        search,
+        departmentId,
+        locationId,
+        offset,
+      } = getEmployeesCondtion;
+      const getResult = await getEmployees({ search, departmentId, locationId, offset });
+      if (getResult && getResult.data && !getResult.data.success) {
+        dispatch({ type: EMPLOYEE_ERROR, payload: result.data.error.message });
+      }
+      else {
+        dispatch({ type: GET_EMPLOYEES, payload: getResult.data.data });
+      }
+    }
+  }
+  catch (err) {
+    dispatch({ type: EMPLOYEE_ERROR, payload: err.message});
+  }
+};
+
+/**
+ * creates employe using addEmployeeApi
+ */
+export const addEmployee = (employee) => async dispatch => {
+  try {
     const result = await addEmployeeApi({
       name: employee.name,
       email: employee.email,
@@ -54,26 +73,23 @@ export const addEmployee = (employee) => async dispatch => {
       departmentId: employee.departmentId,
       locationId: employee.locationId
      });
-    console.log('result', result);
     if (result && result.data && !result.data.success) {
-      console.log('in if');
       dispatch({ type: EMPLOYEE_ERROR, payload: result.data.error.message });
     }
     else {
-      console.log('in else');
       dispatch({ type: ADD_EMPLOYEE, payload: result.data.data });
     }
   }
   catch (err) {
-    console.log('err', err);
     dispatch({ type: EMPLOYEE_ERROR, payload: err.message });
   }
 };
 
-export const editEmployee = (employee) => async dispatch => {
-  console.log('emp to create11', employee);
+/**
+ * creates employe using editEmployeeApi
+ */
+export const editEmployee = ({ employee, getEmployeesCondtion }) => async dispatch => {
   try {
-    console.log('in get all employees');
     const result = await editEmployeeApi({
       employeeId: employee._id,
       name: employee.name,
@@ -82,18 +98,26 @@ export const editEmployee = (employee) => async dispatch => {
       departmentId: employee.departmentId,
       locationId: employee.locationId
      });
-    console.log('result', result);
     if (result && result.data && !result.data.success) {
-      console.log('in if');
       dispatch({ type: EMPLOYEE_ERROR, payload: result.data.error.message });
     }
     else {
-      console.log('in else');
-      dispatch({ type: EDIT_EMPLOYEE, payload: result.data.data });
+      const {
+        search,
+        departmentId,
+        locationId,
+        offset,
+      } = getEmployeesCondtion;
+      const getResult = await getEmployees({ search, departmentId, locationId, offset });
+      if (getResult && getResult.data && !getResult.data.success) {
+        dispatch({ type: EMPLOYEE_ERROR, payload: result.data.error.message });
+      }
+      else {
+        dispatch({ type: GET_EMPLOYEES, payload: getResult.data.data });
+      }
     }
   }
   catch (err) {
-    console.log('err', err);
     dispatch({ type: EMPLOYEE_ERROR, payload: err.message });
   }
 };

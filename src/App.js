@@ -1,24 +1,28 @@
+// libraries
 import {
   BrowserRouter as Router,
   Route,
   Redirect,
   Switch,
 } from 'react-router-dom';
-import { Provider } from "react-redux";
+import { Provider } from 'react-redux';
 
-import './App.css'
+// files
 import Employees from './pages/Employees';
 import store from './store/index';
+
+// css
+import './App.css'
 
 function App() {
   return (
     <Provider store={store}>
       <Router>
         <Switch>
-          <Route path="/employees">
+          <Route path='/employees'>
             <Employees />
           </Route>
-          <Route path="/">
+          <Route path='/'>
             <Employees />
           </Route>
         </Switch>

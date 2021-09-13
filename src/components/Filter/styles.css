@@ -1,13 +1,6 @@
 .filter-row {
-  margin-top: 50px;
-  margin-bottom: 50px;
   display: flex;
-  margin-left:130px;
-  margin-right: 130px;
-  /* justify-content: center; */
-  /* flex-direction: row-reverse; */
-
-  /* margin-right: 50px; */
+  margin: 50px 100px;
 }
 
 .select-div {
@@ -18,4 +11,15 @@
 .menu-item {
   text-align: center;
   margin-left: 10px;
+}
+
+
+@media only screen and (max-width:744px) {
+  .filter-row {
+    flex-direction: column;
+  }
+  .select-div {
+    margin: 0 auto;
+    margin-top: 5px;
+  }
 }

@@ -1,3 +1,8 @@
+// libraries
+import PropTypes from 'prop-types';
+import { useDispatch } from 'react-redux';
+
+// marerial ui
 import Card from '@material-ui/core/Card';
 import CardHeader from '@material-ui/core/CardHeader';
 import CardMedia from '@material-ui/core/CardMedia';
@@ -7,67 +12,62 @@ import Typography from '@material-ui/core/Typography';
 import IconButton from '@material-ui/core/IconButton';
 import EditIcon from '@material-ui/icons/Edit';
 import DeleteIcon from '@material-ui/icons/Delete';
-
 import { makeStyles } from '@material-ui/core/styles';
 
-import { useSelector, useDispatch } from "react-redux";
-
-
+// constants
 import { CURRENT_EMPLOYEE } from '../../../actionTypes';
 
-import "./styles.css";
-
-const EmployeeCard = ({ employee, handleDelete, handleEdit }) => {
+const useStyles = makeStyles((theme) => ({
+  root: {
+    width: 250,
+    marginTop: '20px',
+    cursor: 'pointer',
+    border: '1px solid #b6b6b6',
+    '&:hover': {
+      transform: 'scale(1.08)',
+      animation: '10px 20px 30px blue 5s infinite',
+      border: '1px solid green',
+    },
+    '& .MuiCardHeader-content': {
+      'whiteSpace': 'nowrap',
+      'overflow': 'hidden !important',
+      'textOverflow': 'ellipsis',
+      'width': '90%'
+    },
+    '& .MuiCardHeader-title': {
+      'overflow': 'hidden !important',
+      'textOverflow': 'ellipsis',
+    }
+  },
+  media: {
+    paddingTop: '60%',
+  },
+  typography: {
+    backgroundColor: 'green',
+    color: 'white',
+    padding: '5px',
+    textAlign: 'center',
+    float: 'left',
+    marginBottom: '10px'
+  },
+  deleteIcon: {
+    color: 'red',
+    float: 'right'
+  }
+}));
+const EmployeeCard = ({ employee, onDeleteClick, onEditClick }) => {
 
   const dispatch = useDispatch();
-  const useStyles = makeStyles((theme) => ({
-    root: {
-      width: 250,
-      marginTop: '20px',
-      cursor: "pointer",
-      border: '1px solid #b6b6b6',
-      '&:hover': {
-        transform: 'scale(1.08)',
-        // boxShadow: '0 10px 20px rgba(0,0,0,.16), 0 4px 8px rgba(0,0,0,.06)',
-        animation: '10px 20px 30px blue 5s infinite',
-        border: '1px solid green',
-      }
-    },
-    media: {
-      height: 0,
-      paddingTop: '56.25%', // 16:9
-    },
-    typography: {
-      backgroundColor: "green",
-      color: "white",
-      padding: "5px",
-      textAlign: "center",
-      float: "left",
-      marginBottom: "10px"
-    },
-    email: {
-      marginRight: '10px',
-    },
-    deleteIcon: {
-      color: "red",
-      float: "right"
-    }
-    // avatar: {
-    //   backgroundColor: red[500],
-    // },
-  }));
 
-  const onEditClicked = (e) => {
-    console.log('edit clicked');
+  const handleEditClick = (e) => {
     e.preventDefault();
     dispatch({ type: CURRENT_EMPLOYEE, payload: employee });
-    handleEdit(employee._id);
+    onEditClick(employee._id);
   }
 
-  const onDeleteClicked = (e) => {
+  const handleDeleteClick = (e) => {
     e.preventDefault();
-    console.log('on delete clicked inside', e);
-    handleDelete(employee._id);
+    onDeleteClick(employee._id);
   }
 
   const classes = useStyles();
@@ -78,9 +78,9 @@ const EmployeeCard = ({ employee, handleDelete, handleEdit }) => {
     >
       <CardHeader
         action={
-          <IconButton aria-label="edit">
+          <IconButton aria-label='edit'>
           <EditIcon
-            onClick={(e) => onEditClicked(e)}
+            onClick={(e) => handleEditClick(e)}
           />
           </IconButton>
         }
@@ -90,23 +90,45 @@ const EmployeeCard = ({ employee, handleDelete, handleEdit }) => {
       <CardMedia
         className={classes.media}
         image={employee.imageUrl}
-        placeholder='logo512.png'
       />
       <CardContent>
         <div>
-          <Typography variant="body" className={classes.typography}>
+          <Typography variant='body' className={classes.typography}>
             {employee.departmentId.title}
           </Typography>
           <DeleteIcon
             className={classes.deleteIcon}
-            onClick={(e) => onDeleteClicked(e)}
+            onClick={(e) => handleDeleteClick(e)}
           />
         </div>
-        <Typography className={classes.email}>
+        <Typography>
          {employee.email}
         </Typography>
       </CardContent>
     </Card>
   );
 };
+
+// default props
+EmployeeCard.defaultProps = {
+  employee: {
+    name: '',
+    email: '',
+    departmentId: {
+      _id: 0,
+      name: ''
+    },
+    locationId: {
+      _id: 0,
+      name: ''
+    }
+  }
+}
+
+//prop types
+EmployeeCard.propTypes = {
+  employee: PropTypes.object.isRequired,
+  onDeleteClick: PropTypes.func.isRequired,
+  onEditClick: PropTypes.func.isRequired
+}
 export default EmployeeCard;

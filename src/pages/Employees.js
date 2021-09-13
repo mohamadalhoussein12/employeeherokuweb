@@ -1,6 +1,9 @@
+// libraries
 import { useState, useEffect } from 'react';
-import { useSelector, useDispatch } from "react-redux";
+// redux
+import { useSelector, useDispatch, shallowEqual } from 'react-redux';
 
+// material ui
 import { makeStyles } from '@material-ui/core/styles';
 import Pagination from '@material-ui/lab/Pagination';
 import Dialog from '@material-ui/core/Dialog';
@@ -15,21 +18,42 @@ import EmployeeList from '../components/EmployeeList';
 import DeleteDialog from '../components/DeleteDialog';
 import AddEmployee from '../components/AddEmployee';
 
+// files
 import { getAllDepartments } from '../actions/department';
 import { getAllLocations } from '../actions/location';
-import { EMPLOYEE_ERROR } from '../actionTypes';
 import {
   getAllEmployees,
   deleteEmployee,
   addEmployee,
   editEmployee,
 } from '../actions/employee';
-import { EMPLOYEE_LIMIT } from '../constants';
 
+// constants
+import { EMPLOYEE_ERROR, DEPARTMENTS_ERROR, LOCATIONS_ERROR } from '../actionTypes';
+import { EMPLOYEE_LIMIT } from '../constants';
+const useStyles = makeStyles((theme) => ({
+  root: {
+    '& > *': {
+      justifyContent:'center',
+      display:'flex',
+      marginTop: '20px',
+      marginBottom: '20px'
+    },
+    '& .MuiPaginationItem-page.Mui-selected': {
+      color: 'white',
+      backgroundColor: 'green'
+    }
+  },
+  logoDiv: {
+    'paddingTop': '50px'
+  },
+  emptyDiv: {
+    textAlign: 'center'
+  }
+}));
 
 const Employees = () => {
   const dispatch = useDispatch();
-
 
   const [location, setLocation] = useState('');
   const [department, setDepartment] = useState('');
@@ -45,11 +69,13 @@ const Employees = () => {
 
   const employees = useSelector((state) => state.employees.employees);
   const employeesErrors = useSelector((state) => state.employees.error);
-  if (employeesErrors && employeesErrors.length && !openDialogError) {
+  const departmentErros = useSelector((state) => state.departments.error);
+  const locationErros = useSelector((state) => state.locations.error);
+
+  if (((employeesErrors && employeesErrors.length) || (departmentErros &&
+     departmentErros.length) || (locationErros && locationErros.length)) && !openDialogError) {
     setOpenDialogError(true);
   }
-  console.log('employeesErrors', employeesErrors);
-  console.log('open dialog error', openDialogError);
 
   const getEmployeesParams = {
     search: search,
@@ -62,48 +88,42 @@ const Employees = () => {
     dispatch(getAllDepartments());
     dispatch(getAllLocations());
     dispatch(getAllEmployees(getEmployeesParams));
-    console.log('employees', employees);
   }, [])
-
-  console.log('get emp', getEmployeesParams);
-  console.log('employees', employees);
 
 
   const changeSearchInput = (e) => {
-    console.log('change search input', e.target.value);
     setSearch(e.target.value);
     dispatch(getAllEmployees({
       ...getEmployeesParams,
       search: e.target.value,
-      }
-    ));
+      offset: 0,
+    }));
+    setOffset(0);
   }
 
   const handleSelectedDep = (e) => {
-    console.log('change search input 11', e);
     setDepartment(e.target.value);
     dispatch(getAllEmployees({
       ...getEmployeesParams,
       departmentId: e.target.value,
-      }
-    ));
+      offset: 0,
+    }))
+    setOffset(0);
   }
   const handleSelectedLocation = (e) => {
-    console.log('change search input 1122', e);
     setLocation(e.target.value);
     dispatch(getAllEmployees({
       ...getEmployeesParams,
       locationId: e.target.value,
-      }
-    ));
+      offset: 0
+    }));
+    setOffset(0);
   }
 
   const paginationCount = employees && employees.totalCount ? Math.ceil(employees.totalCount/EMPLOYEE_LIMIT) : 0;
 
   const onChangeOffset = (page) => {
-    console.log('in on change', page);
     const nextOffset = (page -1)*EMPLOYEE_LIMIT;
-    console.log('next offset', nextOffset);
     setOffset(nextOffset);
     dispatch(getAllEmployees({
       ...getEmployeesParams,
@@ -112,24 +132,25 @@ const Employees = () => {
     ));
   }
 
-  const onDeleteEmployee = (id) => {
-    // console.log('employee deleted');
+  const onDeleteEmployee = async (id) => {
     setOpenDelete(false);
-    dispatch(deleteEmployee({ employeeId: id }));
-    dispatch(getAllEmployees(getEmployeesParams));
+    await dispatch(deleteEmployee({
+      employeeId: id,
+      getEmployeesCondtion: {
+        ...getEmployeesParams,
+        offset: 0
+      }
+    }));
+    // await dispatch(getAllEmployees({
+    //
+    // }));
     setEmployeeDelete(0);
-    console.log('employee data', employeeDelete);
   }
 
   const deleteClicked = (id) => {
-    console.log('in delete clicked', id);
-    console.log('open delete in click', openDelete);
-    console.log('open delete in click employee data', employeeDelete);
     if (!openDelete) {
       employees.data.forEach((item, i) => {
-        console.log('in loop');
         if (item._id === id){
-          console.log('in iff');
           setOpenDelete(true);
           setEmployeeDelete(item);
         }
@@ -144,6 +165,8 @@ const Employees = () => {
 
   const onCloseDialogError = () => {
     dispatch({ type: EMPLOYEE_ERROR, payload: []});
+    dispatch({ type: DEPARTMENTS_ERROR, payload: []});
+    dispatch({ type: LOCATIONS_ERROR, payload: []});
     setOpenDialogError(false);
   }
 
@@ -158,14 +181,18 @@ const Employees = () => {
     setOpenAddModal(false);
   }
 
-  const createEmployee = (emp) => {
-    if (emp._id) {
-      console.log('emp to edit', emp);
-      dispatch(editEmployee(emp));
+  const createEmployee = (employeeToAdd) => {
+    if (employeeToAdd._id) {
+      dispatch(editEmployee({
+        employee: employeeToAdd,
+        getEmployeesCondtion: {
+          ...getEmployeesParams,
+          offset: 0
+        }
+      }));
     }
     else {
-      console.log('emp to create', emp);
-      dispatch(addEmployee(emp))
+      dispatch(addEmployee(employeeToAdd))
     }
     setOpenAddModal(false);
   }
@@ -173,87 +200,68 @@ const Employees = () => {
   const editEmployeeClicked = (employeeId) => {
     if (!openAddModal) {
       employees.data.forEach((item, i) => {
-        console.log('in loop');
         if (item._id === employeeId){
-          console.log('in iff');
           setOpenAddModal(true);
         }
       });
     }
   }
-
-
-
-
-  const useStyles = makeStyles((theme) => ({
-    root: {
-      "& > *": {
-        justifyContent:"center",
-        display:'flex',
-        marginTop: "20px",
-        marginBottom: "20px"
-          // backgroundColor: "green"
-      },
-      "& .MuiPaginationItem-page.Mui-selected": {
-        color: "white",
-        backgroundColor: "green"
-      }
-    }
-  }));
   const classes = useStyles();
-
   return (
     <div>
-      <img
-        src='logo512.png'
-        alt='img'
-        className='img-logo'
-      />
+      <div className={classes.logoDiv}>
+        <img
+          src='logo512.png'
+          alt='img'
+          className='img-logo'
+        />
+      </div>
       <Filter
-        changeSarchInput={changeSearchInput}
-        handleSelectedDep={handleSelectedDep}
-        handleSelectedLocation={handleSelectedLocation}
-        handleButtonClick={(e) => onAddClick(e)}
+        onSearchInputChange={changeSearchInput}
+        onSelectDepartment={handleSelectedDep}
+        onSelectLocation={handleSelectedLocation}
+        onAddButtonClick={(e) => onAddClick(e)}
       />
       {
-        employeesErrors &&
-          <Dialog
-            open={openDialogError}
-            onClose={onCloseDialogError}
-            >
-              <DialogTitle id="alert-dialog-title">
-                An error has occured
-              </DialogTitle>
-              <DialogContent>
-                <DialogContentText id="alert-dialog-description">
-                  {employeesErrors}
-                </DialogContentText>
-              </DialogContent>
-              <DialogActions>
-                <Button onClick={onCloseDialogError}>
-                  Close
-                </Button>
-              </DialogActions>
-            </Dialog>
+        openDialogError &&
+        <Dialog
+          open={openDialogError}
+          onClose={onCloseDialogError}
+        >
+          <DialogTitle id='alert-dialog-title'>
+            An error has occured
+          </DialogTitle>
+          <DialogContent>
+            <DialogContentText id='alert-dialog-description'>
+              {employeesErrors || departmentErros || locationErros}
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={onCloseDialogError}>
+              Close
+            </Button>
+          </DialogActions>
+        </Dialog>
       }
       {employees && employees.data && employees.data.length > 0 ?
         <EmployeeList
           employees={employees.data}
           onDeleteEmployee={(e) => deleteClicked(e)}
           onEditEmployee={(e) => editEmployeeClicked(e)}
-        /> : <p>No Employees to Show</p>
+        /> : <div class={classes.emptyDiv}>No Employees to Show</div>
       }
       {paginationCount > 0 &&
         <div>
           <Pagination
             className={classes.root}
             count={paginationCount}
+            page={offset === 0 ? 1 : offset/EMPLOYEE_LIMIT + 1}
             onChange={(e, page) => onChangeOffset(page)}
           />
         </div>
       }
       {
-        employeeDelete &&
+        openDelete &&
         <DeleteDialog
           employee={employeeDelete}
           onConfirm={(e) => onDeleteEmployee(employeeDelete._id)}
@@ -262,6 +270,7 @@ const Employees = () => {
         />
       }
       {
+        openAddModal &&
         <AddEmployee
           open={openAddModal}
           onDiscard={(e) => onCloseAddModal(e)}

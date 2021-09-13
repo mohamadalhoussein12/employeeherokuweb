@@ -1,27 +1,22 @@
-import React, { useState } from 'react';
+// libraries
+import { useState } from 'react';
 import PropTypes from 'prop-types';
-import { useSelector, useDispatch } from "react-redux";
-import { Search } from '@material-ui/icons';
+
+// redux
+import { useSelector } from 'react-redux';
+
+// material ui
 import Select from '@material-ui/core/Select';
 import Button from '@material-ui/core/Button';
 import { makeStyles } from '@material-ui/core/styles';
 import MenuItem from '@material-ui/core/MenuItem';
 
-import Input  from '../Input';
+// files
+import SearchInput  from '../SearchInput';
+
+// css
 import './styles.css';
-
-
-const Filter = ({ changeSarchInput, handleButtonClick, handleSelectedDep, handleSelectedLocation }) => {
-
-  const departments = useSelector((state) => state.departments.departments);
-  const locations = useSelector((state) => state.locations.locations);
-  const [selectedDep, setSlectedDep] = useState('');
-  const [selectedLocation, setSelectedLocation] = useState('');
-
-  const [searchInput, setSearchInput] = useState('');
-  const [addButtonClicked, setAddButtonClicked] = React.useState(false);
-
-  const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme) => ({
   selectDropDown: {
     width: '100px',
     border: '1px solid #b6b6b6',
@@ -39,67 +34,68 @@ const Filter = ({ changeSarchInput, handleButtonClick, handleSelectedDep, handle
     border: '1px solid green',
     background: 'green',
     color:'white',
-    '&:hover':{
+    '&:hover': {
       background: 'green'
-    },
+    }
   }
 }));
 
-const classes = useStyles();
+const Filter = ({ onSearchInputChange, onSelectDepartment, onSelectLocation, onAddButtonClick }) => {
+  const classes = useStyles();
+  const departments = useSelector((state) => state.departments.departments);
+  const locations = useSelector((state) => state.locations.locations);
+  const [selectedDep, setSlectedDep] = useState('');
+  const [selectedLocation, setSelectedLocation] = useState('');
 
-  const handleChange = (e) => {
-    console.log('idd', e);
-    // setSearchInput(e);
-    changeSarchInput(e);
-  };
+  const handleSearchChange = (e) => {
+    onSearchInputChange(e);
+  }
 
   const handleSelectChange = (e) => {
-    setSlectedDep(e.target.value)
-    handleSelectedDep(e);
+    setSlectedDep(e.target.value);
+    onSelectDepartment(e);
   }
 
   const handleLocationChange = (e) => {
     setSelectedLocation(e.target.value)
-    handleSelectedLocation(e);
+    onSelectLocation(e);
   }
 
-  const handleAddClick = (e) => {
-    handleButtonClick(e)
+  const handleAddButtonClick = (e) => {
+    onAddButtonClick(e);
   }
 
   return (
     <div>
-      <div className="filter-row">
-        <Input
-          label='Search Employees'
+      <div className='filter-row'>
+        <SearchInput
           placeholder='Type to Search'
-          onChangeInput ={(e) => handleChange(e)}
-          isSearch
+          onChangeInput ={(e) => handleSearchChange(e)}
         />
-        <div className="select-div">
+        <div className='select-div'>
           <Select
-            labelId="demo-simple-select-label"
-            id="demo-simple-select"
+            labelId='demo-simple-select-label'
+            id='demo-simple-select'
             value={selectedDep ? selectedDep : 0}
             onChange={handleSelectChange}
             className={classes.selectDropDown}
           >
-          <MenuItem value={0}>All</MenuItem>
-          {departments && departments.length && departments.map((item) => <MenuItem value={item._id}>{item.title}</MenuItem>)}
+            <MenuItem value={0}>All</MenuItem>
+            {departments && departments.length && departments.map((item) => <MenuItem value={item._id}>{item.title}</MenuItem>)}
           </Select>
           <Select
-            labelId="demo-simple-select-label"
-            id="demo-simple-select"
+            labelId='demo-simple-select-label'
+            id='demo-simple-select'
             value={selectedLocation ? selectedLocation : 1}
             onChange={handleLocationChange}
             className={classes.selectDropDown}
           >
-          <MenuItem value={1}>All</MenuItem>
-          {locations && locations.length && locations.map((item) => <MenuItem value={item._id}>{item.name}</MenuItem>)}
+            <MenuItem value={1}>All</MenuItem>
+            {locations && locations.length && locations.map((item) => <MenuItem value={item._id}>{item.name}</MenuItem>)}
           </Select>
           <Button
             className={classes.button}
-            onClick={(e) => handleAddClick(e)}
+            onClick={(e) => handleAddButtonClick(e)}
           >
             Add
           </Button>
@@ -109,11 +105,16 @@ const classes = useStyles();
   )
 }
 
+// default props
 Filter.defaultProps = {
 }
 
+//prop types
 Filter.propTypes = {
-  handleChange: PropTypes.func.isRequired
+  onSearchInputChange: PropTypes.func.isRequired,
+  onSelectDepartment: PropTypes.func.isRequired,
+  onSelectLocation: PropTypes.func.isRequired,
+  onAddButtonClick: PropTypes.func.isRequired
 }
 
 
