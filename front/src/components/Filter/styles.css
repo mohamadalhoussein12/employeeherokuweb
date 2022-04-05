@@ -1,0 +1,25 @@
+.filter-row {
+  display: flex;
+  margin: 50px 100px;
+}
+
+.select-div {
+  margin-left: auto;
+  margin-right: 10px;
+}
+
+.menu-item {
+  text-align: center;
+  margin-left: 10px;
+}
+
+
+@media only screen and (max-width:744px) {
+  .filter-row {
+    flex-direction: column;
+  }
+  .select-div {
+    margin: 0 auto;
+    margin-top: 5px;
+  }
+}
